@@ -1,0 +1,5 @@
+{
+  "name": "f1",
+  "version": "0.1.1",
+  "description": "Formula 1 semantic model covering race results, drivers, constructors, and circuits (1950-2017). Use for performance analysis, season trends, driver/team rankings, and grid-to-finish insights."
+}

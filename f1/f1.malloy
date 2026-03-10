@@ -1,0 +1,194 @@
+##! experimental.access_modifiers
+
+// --- Lookup sources (defined first for join ordering) ---
+
+#(doc) Formula 1 racing circuits worldwide. Use for location-based analysis of races.
+source: circuits is bq_demo.table('formula_1.circuits') extend {
+  primary_key: circuitId
+
+  rename:
+    #(doc) Official name of the racing circuit (e.g. Silverstone Circuit, Circuit de Monaco)
+    #(index_values) n=-1
+    circuit_name is `name`
+
+  dimension:
+    #(doc) City or area where the circuit is located (e.g. Monza, Monte-Carlo, Spa)
+    #(index_values) n=-1
+    circuit_location is location
+
+    #(doc) Country where the circuit is located (e.g. UK, Italy, Monaco, USA)
+    #(index_values) n=-1
+    circuit_country is country
+}
+
+#(doc) Race finishing status codes — Finished, Accident, Engine failure, Collision, Retired, etc.
+source: race_status is bq_demo.table('formula_1.status') extend {
+  primary_key: statusId
+
+  rename:
+    #(doc) Race finishing status (e.g. Finished, Engine, Accident, Collision, Gearbox, Retired, Spun off)
+    #(index_values) n=-1
+    status_label is `status`
+}
+
+#(doc) Formula 1 constructor teams (Ferrari, McLaren, Mercedes, Red Bull, Williams, etc.)
+source: constructors is bq_demo.table('formula_1.constructors') extend {
+  primary_key: constructorId
+
+  rename:
+    #(doc) Constructor team name (e.g. Ferrari, McLaren, Mercedes, Red Bull, Williams)
+    #(index_values) n=-1
+    constructor_name is `name`
+
+  dimension:
+    #(doc) Nationality of the constructor team (e.g. Italian, British, German, Austrian)
+    #(index_values) n=-1
+    constructor_nationality is nationality
+}
+
+#(doc) Formula 1 drivers — names, nationality, date of birth, and career codes.
+source: drivers is bq_demo.table('formula_1.drivers') extend {
+  primary_key: driverId
+
+  dimension:
+    #(doc) Full name of the driver (e.g. Lewis Hamilton, Michael Schumacher, Ayrton Senna)
+    #(index_values) n=-1
+    driver_name is concat(forename, ' ', surname)
+
+    #(doc) Three-letter driver code (e.g. HAM, VET, ALO, RAI, ROS)
+    #(index_values) n=-1
+    driver_code is code
+
+    #(doc) Driver's nationality (e.g. British, German, Brazilian, Finnish, Spanish)
+    #(index_values) n=-1
+    driver_nationality is nationality
+}
+
+#(doc) Formula 1 race events from 1950 to 2017 — season, round, circuit, and date.
+source: races is bq_demo.table('formula_1.races') extend {
+  primary_key: raceId
+
+  rename:
+    #(doc) Name of the Grand Prix (e.g. Australian Grand Prix, Monaco Grand Prix, British Grand Prix)
+    #(index_values) n=-1
+    race_name is `name`
+
+    #(doc) Date the race was held
+    race_date is `date`
+
+    #(doc) Season year the race took place (1950-2017)
+    season_year is `year`
+
+  join_one: circuits with circuitId
+}
+
+#(doc) Formula 1 race results — one row per driver per race. Central fact table for performance analysis: points, finishing positions, wins, podiums, and lap times across 970 races and 840 drivers.
+source: results is bq_demo.table('formula_1.results') extend {
+  primary_key: resultId
+
+  join_one: races with raceId
+  join_one: drivers with driverId
+  join_one: constructors with constructorId
+  join_one: race_status with statusId
+
+  dimension:
+    #(doc) Whether the driver was classified as finishing the race (completed or lapped)
+    is_classified is race_status.status_label ? 'Finished' | '+1 Lap' | '+2 Laps' | '+3 Laps' | '+4 Laps' | '+5 Laps' | '+6 Laps' | '+7 Laps' | '+8 Laps' | '+9 Laps' | '+11 Laps' | '+17 Laps'
+
+    #(doc) Whether the driver did not finish — mechanical failure, accident, collision, or retirement
+    is_dnf is not is_classified
+
+    #(doc) Positions gained or lost from starting grid to finish (positive = gained positions, negative = lost)
+    positions_gained is grid - positionOrder
+
+  measure:
+    #(doc) Total number of race entries/results
+    result_count is count()
+
+    #(doc) Total championship points earned across all included results
+    total_points is sum(points)
+
+    #(doc) Number of race victories (first place finishes)
+    win_count is count() { where: positionOrder = 1 }
+
+    #(doc) Number of podium finishes (first, second, or third place)
+    podium_count is count() { where: positionOrder <= 3 }
+
+    #(doc) Number of times a driver did not finish the race (DNF)
+    dnf_count is count() { where: is_dnf = true }
+
+    #(doc) Average finishing position (lower is better)
+    avg_finish_position is avg(positionOrder)
+
+    #(doc) Average starting grid position (lower is better)
+    avg_grid_position is avg(grid)
+
+    #(doc) Average positions gained per race from grid to finish (positive = improvement)
+    avg_positions_gained is avg(positions_gained)
+
+    #(doc) Number of distinct drivers
+    driver_count is count(driverId)
+
+    #(doc) Number of distinct races
+    race_count is count(raceId)
+
+  // --- Views ---
+
+  #(doc) High-level F1 statistics overview — total results, races, drivers, wins, and podiums
+  # big_value
+  view: summary is {
+    aggregate:
+      # label="Results"
+      result_count
+      # label="Races"
+      race_count
+      # label="Drivers"
+      driver_count
+      # label="Total Wins"
+      win_count
+      # label="Total Podiums"
+      podium_count
+  }
+
+  #(doc) Championship points by season for tracking trends over time (1950-2017)
+  # line_chart
+  view: by_season is {
+    group_by: season is races.season_year
+    aggregate: total_points
+    order_by: season
+  }
+
+  #(doc) Top 20 drivers ranked by career wins with podiums, points, and average finish
+  view: top_drivers is {
+    group_by: driver_name is drivers.driver_name
+    aggregate:
+      win_count
+      podium_count
+      total_points
+      result_count
+      avg_finish_position
+    order_by: win_count desc
+    limit: 20
+  }
+
+  #(doc) Overview dashboard combining KPI summary, season points trend, and constructor wins ranking
+  # dashboard
+  view: overview is {
+    nest: summary
+    nest:
+      # line_chart
+      points_by_season is {
+        group_by: season is races.season_year
+        aggregate: total_points
+        order_by: season
+      }
+    nest:
+      # bar_chart
+      wins_by_constructor is {
+        group_by: team is constructors.constructor_name
+        aggregate: win_count
+        order_by: win_count desc
+        limit: 15
+      }
+  }
+}
