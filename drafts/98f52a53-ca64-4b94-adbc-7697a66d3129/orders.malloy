@@ -8,4 +8,5 @@ source: orders is duckdb.sql("""
 """) extend {
   measure: order_count is count()
   measure: total_amount is sum(amount)
+  measure: avg_amount is avg(amount)
 }
