@@ -1,0 +1,30 @@
+>>>markdown
+# Orders Analysis
+Exploring the smoke-test orders data: who spends the most, and how does spend trend over time?
+
+>>>malloy
+import "orders.malloy"
+
+>>>markdown
+## Total amount by customer
+Which customers account for the most spend?
+
+>>>malloy
+# bar_chart
+run: orders -> {
+  group_by: customer
+  aggregate: total_amount, order_count
+  order_by: total_amount desc
+}
+
+>>>markdown
+## Monthly trend
+How does total order amount move month over month?
+
+>>>malloy
+# line_chart
+run: orders -> {
+  group_by: order_month is order_date.month
+  aggregate: total_amount, order_count
+  order_by: order_month
+}
