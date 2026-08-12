@@ -6,3 +6,9 @@ source: numbers is duckdb.sql("""
 """) extend {
   measure: total_n is sum(n)
 }
+
+// Named query over the numbers source
+query: numbers_summary is numbers -> {
+  aggregate: total_n
+  aggregate: row_count is count()
+}
