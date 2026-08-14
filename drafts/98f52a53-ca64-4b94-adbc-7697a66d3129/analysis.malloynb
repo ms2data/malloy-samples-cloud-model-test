@@ -13,7 +13,7 @@ Which customers account for the most spend?
 # bar_chart
 run: orders -> {
   group_by: customer
-  aggregate: total_amount, order_count
+  aggregate: total_amount, avg_amount, order_count
   order_by: total_amount desc
 }
 
@@ -25,6 +25,6 @@ How does total order amount move month over month?
 # line_chart
 run: orders -> {
   group_by: order_month is order_date.month
-  aggregate: total_amount, order_count
+  aggregate: total_amount, avg_amount, order_count
   order_by: order_month
 }

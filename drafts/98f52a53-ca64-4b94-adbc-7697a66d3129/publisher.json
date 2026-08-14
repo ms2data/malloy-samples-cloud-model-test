@@ -1,5 +1,5 @@
 {
   "name": "git-pilot-smoke",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Smoke-test package with a trivial numbers source (and named query) plus a small orders source."
 }
