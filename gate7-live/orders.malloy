@@ -11,4 +11,8 @@ source: orders is bigquery.table('bigquery-public-data.thelook_ecommerce.orders'
 
     # (doc) "Orders that were returned (returned_at is set)."
     returned_order_count is count() { where: returned_at != null }
+
+    # (doc) "Share of orders that were returned."
+    # percent
+    return_rate is returned_order_count / nullif(order_count, 0)
 }
