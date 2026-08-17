@@ -1,0 +1,3 @@
+source: sales is bigquery.table('bigquery-public-data.thelook_ecommerce.orders') extend {
+  measure: order_count is count()
+}
