@@ -1,3 +1,14 @@
 source: orders is bigquery.table('bigquery-public-data.thelook_ecommerce.orders') extend {
-  measure: order_count is count()
+  measure:
+    # (doc) "Number of orders."
+    order_count is count()
+
+    # (doc) "Total units sold across all orders (num_of_item summed)."
+    total_items is sum(num_of_item::number)
+
+    # (doc) "Distinct customers who placed orders."
+    customer_count is count(user_id)
+
+    # (doc) "Orders that were returned (returned_at is set)."
+    returned_order_count is count() { where: returned_at != null }
 }
