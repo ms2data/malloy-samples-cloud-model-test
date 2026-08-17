@@ -1,0 +1,5 @@
+{
+  "name": "gate7-live",
+  "version": "0.0.1",
+  "description": "Orders source over the thelook_ecommerce orders table with an order count measure."
+}
