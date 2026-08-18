@@ -1,0 +1,10 @@
+// Orders model over thelook_ecommerce.orders (bq_demo)
+source: orders is bq_demo.table('thelook_ecommerce.orders') extend {
+
+  // Dimensions
+  dimension: order_status is status
+  dimension: customer_gender is gender
+
+  // Measures
+  measure: order_count is count()
+}
