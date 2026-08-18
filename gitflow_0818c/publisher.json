@@ -1,0 +1,5 @@
+{
+  "name": "gitflow_0818c",
+  "version": "0.0.1",
+  "description": "Users model over the thelook_ecommerce.users table (bq_demo connection), with full_name and age_group dimensions and a user_count measure."
+}
