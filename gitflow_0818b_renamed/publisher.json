@@ -1,5 +1,5 @@
 {
-  "name": "gitflow_0818b",
+  "name": "gitflow_0818b_renamed",
   "version": "0.0.1",
   "description": "Orders model over thelook_ecommerce.orders (bq_demo) with order status and customer gender dimensions and an order count measure."
 }
