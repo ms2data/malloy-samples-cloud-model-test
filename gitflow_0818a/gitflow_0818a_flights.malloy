@@ -4,6 +4,7 @@ source: order_items is bq_demo.table('thelook_ecommerce.order_items') extend {
   dimension: is_returned is returned_at != null
   dimension: is_shipped is shipped_at != null
   dimension: is_delivered is delivered_at != null
+  dimension: is_cancelled is status = 'Cancelled'
 
   // Measure
   measure: total_sale_price is sum(sale_price)
