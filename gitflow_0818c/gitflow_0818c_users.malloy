@@ -1,0 +1,18 @@
+// Users model over thelook_ecommerce.users (bq_demo connection)
+
+source: users is bq_demo.table('thelook_ecommerce.users') extend {
+
+  dimension:
+    #(doc) "User's full name, combining first and last name."
+    full_name is concat(first_name, ' ', last_name)
+
+    #(doc) "Age bucket derived from the user's age in years."
+    age_group is
+      pick 'Under 18' when age < 18
+      pick '18-64' when age < 65
+      else '65+'
+
+  measure:
+    #(doc) "Distinct count of users."
+    user_count is count()
+}
