@@ -1,0 +1,5 @@
+{
+  "name": "localtest-orders",
+  "version": "0.0.1",
+  "description": "Trivial local test package with a single orders source (order_id, amount) and a total_amount measure."
+}
