@@ -1,3 +1,4 @@
+// second cycle
 source: localtest_orders is duckdb.sql("select 1 as order_id, 10.5 as amount") extend {
   measure: total_amount is sum(amount)
 }
