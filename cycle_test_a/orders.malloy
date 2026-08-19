@@ -1,0 +1,1 @@
+source: orders is duckdb.sql("select 1 as order_id, 10.0 as amount")
