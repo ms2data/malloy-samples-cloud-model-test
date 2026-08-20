@@ -1,0 +1,13 @@
+// video_demo — a minimal demonstration model.
+// One source over a verified, readable BigQuery table
+// (the public Shakespeare word-frequency sample).
+
+source: shakespeare is bigquery.table('bigquery-public-data.samples.shakespeare') extend {
+  // Columns from the table: word, word_count, corpus, corpus_date.
+
+  #(doc) "Total number of word occurrences across the selected rows."
+  measure: total_word_count is sum(word_count)
+
+  #(doc) "Number of distinct word/corpus entries."
+  measure: entry_count is count()
+}

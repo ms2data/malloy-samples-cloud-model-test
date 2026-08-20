@@ -1,0 +1,5 @@
+{
+  "name": "video_demo",
+  "version": "0.0.1",
+  "description": "Minimal demonstration package: a single Malloy source over the public BigQuery Shakespeare word-frequency sample."
+}
