@@ -1,0 +1,9 @@
+// Small demo model over the public Shakespeare word-frequency sample.
+source: shakespeare is bigquery.table('bigquery-public-data.samples.shakespeare') extend {
+
+  // Total number of words counted across all works.
+  measure: total_word_count is word_count.sum()
+
+  // Number of distinct words (vocabulary size).
+  measure: distinct_words is count(word)
+}
