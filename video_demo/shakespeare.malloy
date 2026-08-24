@@ -9,4 +9,8 @@ source: shakespeare is bigquery.table('bigquery-public-data.samples.shakespeare'
 
   // Average word_count per row (per word/corpus occurrence).
   measure: avg_word_count is word_count.avg()
+
+  // Intentionally broken: references a column that does not exist,
+  // to test that the compile-check gate fails the PR.
+  measure: broken is nosuchfield.sum()
 }
