@@ -6,4 +6,7 @@ source: shakespeare is bigquery.table('bigquery-public-data.samples.shakespeare'
 
   // Number of distinct words (vocabulary size).
   measure: distinct_words is count(word)
+
+  // Average word_count per row (per word/corpus occurrence).
+  measure: avg_word_count is word_count.avg()
 }
