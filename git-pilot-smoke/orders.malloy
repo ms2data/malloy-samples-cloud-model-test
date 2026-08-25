@@ -1,0 +1,12 @@
+// Small smoke-test orders source
+source: orders is duckdb.sql("""
+  SELECT 1 AS id, 'Ana'   AS customer, 42.00  AS amount, DATE '2026-01-05' AS order_date
+  UNION ALL SELECT 2, 'Ben',   19.50, DATE '2026-01-11'
+  UNION ALL SELECT 3, 'Ana',   88.25, DATE '2026-02-02'
+  UNION ALL SELECT 4, 'Cara',  12.00, DATE '2026-02-14'
+  UNION ALL SELECT 5, 'Ben',   55.75, DATE '2026-03-01'
+""") extend {
+  measure: order_count is count()
+  measure: total_amount is sum(amount)
+  measure: avg_amount is avg(amount)
+}
