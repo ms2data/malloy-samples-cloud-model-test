@@ -1,0 +1,5 @@
+{
+  "name": "binmember-demo",
+  "version": "1.0.0",
+  "description": "Fixture carrying a binary member, for the seed-arm skipped-member warning."
+}

@@ -1,0 +1,32 @@
+>>>markdown
+# Cross-model notebook
+
+Imports two models with multi-line `import { ... } from` cells and joins across
+them. Before #5568 the setup cell below was mangled into the restricted-query
+preamble and every cell 400'd with a Malloy syntax error, rendering Ø.
+>>>malloy
+import {
+  alpha
+} from 'metrics_a.malloy'
+
+import {
+  beta
+} from 'metrics_b.malloy'
+>>>markdown
+## Alpha total (single model)
+>>>malloy
+# big_value
+run: alpha -> { aggregate: alpha_total }
+>>>markdown
+## Alpha joined to Beta (cross-model)
+>>>malloy
+# bar_chart
+run: alpha extend {
+  join_one: beta on label = beta.label
+} -> {
+  group_by: label
+  aggregate:
+    a is alpha_total
+    b is beta.beta_total
+  order_by: label
+}
