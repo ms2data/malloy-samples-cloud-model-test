@@ -18,6 +18,10 @@ source: met_objects is bigquery.table('bigquery-public-data.the_met.objects') ex
     # number=auto
     image_count is images.count()
 
+    #(doc) Average object begin date across the collection
+    # number=auto
+    avg_begin_date is avg(object_begin_date)
+
     #(doc) Number of distinct classifications represented (e.g. Paintings, Prints, Photographs)
     # number=auto
     distinct_classification_count is count(classification)
