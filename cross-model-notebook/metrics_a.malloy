@@ -1,0 +1,3 @@
+source: alpha is duckdb.table('data/alpha.csv') extend {
+  measure: alpha_total is v.sum()
+}
