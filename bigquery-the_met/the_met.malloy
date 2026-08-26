@@ -18,6 +18,10 @@ source: met_objects is bigquery.table('bigquery-public-data.the_met.objects') ex
     # number=auto
     image_count is images.count()
 
+    #(doc) Average object begin date across the collection
+    # number=auto
+    avg_begin_date is avg(object_begin_date)
+
   dimension:
     #(doc) Century of the object's creation (e.g. 1800, 1900)
     object_era is floor(object_begin_date / 100) * 100
