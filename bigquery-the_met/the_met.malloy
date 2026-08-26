@@ -22,6 +22,10 @@ source: met_objects is bigquery.table('bigquery-public-data.the_met.objects') ex
     # number=auto
     avg_begin_date is avg(object_begin_date)
 
+    #(doc) Number of distinct classifications represented (e.g. Paintings, Prints, Photographs)
+    # number=auto
+    distinct_classification_count is count(classification)
+
   dimension:
     #(doc) Century of the object's creation (e.g. 1800, 1900)
     object_era is floor(object_begin_date / 100) * 100
