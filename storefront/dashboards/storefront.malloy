@@ -81,20 +81,20 @@ query: storefront_overview is storefront -> {
     // tile. margin_rate is total gross margin / total revenue per category (not
     // an average of per-line rates), sorted worst-first so the categories that
     // most need attention sit at the top. The card counts how many of those
-    // categories fall under the 45% floor Pricing set — 6 of 26 at the time of
+    // categories fall under the 41% floor Pricing set — 4 of 26 at the time of
     // writing.
     # break
     # big_value
     # colspan=3
-    # label="Categories below 45% margin floor"
+    # label="Categories below 41% margin floor"
     categories_below_floor is {
       group_by: category
       aggregate: margin_rate
     } -> {
       aggregate:
-        # label="Below 45% floor"
+        # label="Below 41% floor"
         # number=auto
-        below_floor is count() { where: margin_rate < 0.45 }
+        below_floor is count() { where: margin_rate < 0.41 }
     }
 
     # bar_chart
@@ -107,21 +107,21 @@ query: storefront_overview is storefront -> {
       order_by: margin_rate asc
     }
 
-    // Zoom on just the categories under Pricing's 45% margin floor — the ones
+    // Zoom on just the categories under Pricing's 41% margin floor — the ones
     // far enough below the ~52% storefront average to warrant attention.
     // `having:` filters on the aggregated margin_rate after grouping, so this
     // stays one grouped query (no pipeline). On the dashboard's
-    // non-cancelled/returned basis this is 6 categories; the tile widens
+    // non-cancelled/returned basis this is 4 categories; the tile widens
     // automatically as the set changes.
     # break
     # bar_chart
     # colspan=12
-    # label="Categories below 45% margin"
+    # label="Categories below 41% margin"
     categories_below_floor_chart is {
       group_by: category
       # percent
       aggregate: margin_rate
-      having: margin_rate < 0.45
+      having: margin_rate < 0.41
       order_by: margin_rate asc
     }
 
