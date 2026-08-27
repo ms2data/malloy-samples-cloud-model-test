@@ -77,12 +77,42 @@ query: storefront_overview is storefront -> {
       aggregate: revenue is total_sales
     }
 
+    // Margin health, on the same non-cancelled/returned revenue as every other
+    // tile. margin_rate is total gross margin / total revenue per category (not
+    // an average of per-line rates), sorted worst-first so the categories that
+    // most need attention sit at the top. The card counts how many of those
+    // categories fall under the 45% floor — 6 of 26 at the time of writing.
+    # break
+    # big_value
+    # colspan=3
+    # label="Categories below 45% margin floor"
+    categories_below_floor is {
+      group_by: category
+      aggregate: margin_rate
+    } -> {
+      aggregate:
+        # label="Below 45% floor"
+        # number=auto
+        below_floor is count() { where: margin_rate < 0.45 }
+    }
+
+    # bar_chart
+    # colspan=9
+    # label="Gross margin % by category (worst first)"
+    margin_by_category is {
+      group_by: category
+      # percent
+      aggregate: margin_rate
+      order_by: margin_rate asc
+    }
+
     // shape_map draws US states only and the customer base spans two countries,
     // so the tile filters rather than dropping the rest into a map that cannot
     // show them. UK customers are a sixth of revenue, so the label has to say
     // this is US-only or the map reads as a shortfall against the Revenue card.
     // The legend takes the field's name, not its `# label`, which is why the
     // measure is renamed to `revenue` here.
+    # break
     # shape_map
     # colspan=6
     # label="Revenue by state (US only)"
