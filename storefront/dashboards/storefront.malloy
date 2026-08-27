@@ -81,19 +81,19 @@ query: storefront_overview is storefront -> {
     // tile. margin_rate is total gross margin / total revenue per category (not
     // an average of per-line rates), sorted worst-first so the categories that
     // most need attention sit at the top. The card counts how many of those
-    // categories fall under the 45% floor — 6 of 26 at the time of writing.
+    // categories fall under the 41% floor — 4 of 26 at the time of writing.
     # break
     # big_value
     # colspan=3
-    # label="Categories below 45% margin floor"
+    # label="Categories below 41% margin floor"
     categories_below_floor is {
       group_by: category
       aggregate: margin_rate
     } -> {
       aggregate:
-        # label="Below 45% floor"
+        # label="Below 41% floor"
         # number=auto
-        below_floor is count() { where: margin_rate < 0.45 }
+        below_floor is count() { where: margin_rate < 0.41 }
     }
 
     # bar_chart
