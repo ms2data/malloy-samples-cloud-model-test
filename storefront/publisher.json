@@ -1,5 +1,0 @@
-{
-    "name": "storefront",
-    "version": "1.2.0",
-    "description": "Storefront Overview dashboard over the thelook ecommerce order lines — revenue, margin, and demand by category, brand and state. Includes gross margin % by category and a count of categories below the 41% margin floor."
-}
