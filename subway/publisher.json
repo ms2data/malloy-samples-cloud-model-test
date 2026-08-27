@@ -1,0 +1,5 @@
+{
+  "name": "subway",
+  "version": "0.1.1",
+  "description": "NYC Subway semantic model covering station ridership trends (2013-2018), station infrastructure (borough, division, structure), and entrance accessibility. Use for ridership analysis, station rankings, and infrastructure breakdowns."
+}

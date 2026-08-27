@@ -1,0 +1,168 @@
+##! experimental.access_modifiers
+
+// ─── Station Infrastructure ─────────────────────────────────────────────────
+
+#(doc) NYC subway stations — 496 stations with borough, division, line, and structure metadata. Use for infrastructure analysis and station breakdowns by geography.
+source: stations is bq_demo.table('new_york_subway.stations') extend {
+  primary_key: station_id
+
+  dimension:
+    #(doc) Name of the subway station (e.g. Times Sq - 42 St, Grand Central - 42 St)
+    #(index_values) n=-1
+    station is station_name
+
+    #(doc) NYC borough where the station is located (Manhattan, Brooklyn, Queens, Bronx, Staten Island)
+    #(index_values) n=-1
+    borough is borough_name
+
+    #(doc) Subway division operating the station (IRT, IND, BMT, SIR)
+    #(index_values) n=-1
+    station_division is division
+
+    #(doc) Subway line the station is on (e.g. Lexington Av, Broadway - 7Av, 8th Av - Fulton St)
+    #(index_values) n=-1
+    station_line is line
+
+    #(doc) Physical structure type (Subway, Elevated, Open Cut, Viaduct, At Grade, Embankment)
+    #(index_values) n=-1
+    station_structure is structure
+
+    #(doc) Routes that serve this station during daytime hours (e.g. 1, A C E, N Q R W)
+    #(index_values) n=-1
+    station_routes is daytime_routes
+
+  measure:
+    #(doc) Total number of stations
+    station_count is count()
+
+    #(doc) Number of distinct station complexes
+    complex_count is count(complex_id)
+
+  #(doc) Station count breakdown by borough
+  # bar_chart
+  view: by_borough is {
+    group_by: borough
+    aggregate: station_count
+    order_by: station_count desc
+  }
+
+  #(doc) Station count breakdown by structure type (Subway, Elevated, Open Cut, etc.)
+  # bar_chart
+  view: by_structure is {
+    group_by: station_structure
+    aggregate: station_count
+    order_by: station_count desc
+  }
+}
+
+// ─── Ridership (2013–2018) ──────────────────────────────────────────────────
+
+#(doc) NYC subway annual ridership by station (2013-2018). Each row is one station-route combination with yearly ridership counts and 2018 change metrics. Use for ridership trends, station rankings, and year-over-year analysis. Note: excludes system/borough summary rows.
+source: ridership is bq_demo.table('new_york_subway.subway_ridership_2013_present') extend {
+  dimension:
+    #(doc) Whether this row is an actual station (false for system/borough summary rows)
+    is_station is
+      station_name != 'System Total'
+      and station_name != 'Manhattan'
+      and station_name != 'Brooklyn'
+      and station_name != 'Queens'
+      and station_name != 'Bronx'
+      and station_name != 'Staten Island'
+      and station_name != 'Systemwide Adjustment'
+
+    #(doc) Name of the subway station (e.g. Times Sq - 42 St / 42 St, 34 St - Penn Station)
+    #(index_values) n=-1
+    stop_name is station_name
+
+    #(doc) Subway routes serving this station, comma-separated (e.g. A,C,E or N,Q,R,W)
+    #(index_values) n=-1
+    served_routes is routes
+
+    #(doc) Ridership trend from 2013 to 2018: Growing (>5%), Stable (-5% to 5%), or Declining (<-5%)
+    #(index_values) n=-1
+    ridership_trend is
+      pick 'Growing' when (ridership_2018 - ridership_2013) * 1.0 / nullif(ridership_2013, 0) > 0.05
+      pick 'Declining' when (ridership_2018 - ridership_2013) * 1.0 / nullif(ridership_2013, 0) < -0.05
+      else 'Stable'
+
+  measure:
+    #(doc) Number of station-route entries
+    entry_count is count()
+
+    #(doc) Total annual ridership in 2018 (in thousands of riders)
+    # number=auto
+    total_ridership_2018 is sum(ridership_2018)
+
+    #(doc) Total annual ridership in 2017
+    # number=auto
+    total_ridership_2017 is sum(ridership_2017)
+
+    #(doc) Total annual ridership in 2016
+    # number=auto
+    total_ridership_2016 is sum(ridership_2016)
+
+    #(doc) Total annual ridership in 2013
+    # number=auto
+    total_ridership_2013 is sum(ridership_2013)
+
+    #(doc) Average annual ridership per station-route in 2018
+    # number=auto
+    avg_ridership_2018 is avg(ridership_2018)
+
+    #(doc) Average year-over-year change percentage in 2018 (negative means ridership declined)
+    # percent
+    avg_change_2018 is avg(change_2018_percent)
+
+  // --- Views ---
+
+  #(doc) System-wide ridership summary across all years
+  # big_value
+  view: summary is {
+    where: is_station = true
+    aggregate:
+      # label="Stations"
+      entry_count
+      # label="2018 Ridership" # number=auto
+      total_ridership_2018
+      # label="2017 Ridership" # number=auto
+      total_ridership_2017
+      # label="2013 Ridership" # number=auto
+      total_ridership_2013
+      # label="Avg Change 2018"
+      avg_change_2018
+  }
+
+  #(doc) Top 20 busiest stations ranked by 2018 annual ridership
+  view: top_stations is {
+    where: is_station = true
+    group_by: stop_name, served_routes
+    aggregate:
+      total_ridership_2018
+      total_ridership_2013
+      avg_change_2018
+    order_by: total_ridership_2018 desc
+    limit: 20
+  }
+
+  #(doc) Dashboard combining ridership summary, top stations, and trend breakdown
+  # dashboard
+  view: overview is {
+    where: is_station = true
+    nest: summary
+    nest:
+      # bar_chart
+      busiest_stations is {
+        group_by: stop_name
+        aggregate: total_ridership_2018
+        order_by: total_ridership_2018 desc
+        limit: 15
+      }
+    nest:
+      # bar_chart
+      by_trend is {
+        group_by: ridership_trend
+        aggregate: entry_count
+        order_by: entry_count desc
+      }
+  }
+}
