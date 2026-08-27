@@ -106,6 +106,24 @@ query: storefront_overview is storefront -> {
       order_by: margin_rate asc
     }
 
+    // Zoom on just the categories under a 40% margin rate — the ones far enough
+    // below the ~52% storefront average to warrant attention. `having:` filters
+    // on the aggregated margin_rate after grouping, so this stays one grouped
+    // query (no pipeline). On the dashboard's non-cancelled/returned basis this
+    // is Clothing Sets and Socks; the tile widens automatically if more slip
+    // under 40%.
+    # break
+    # bar_chart
+    # colspan=12
+    # label="Categories below 40% margin"
+    categories_below_40 is {
+      group_by: category
+      # percent
+      aggregate: margin_rate
+      having: margin_rate < 0.40
+      order_by: margin_rate asc
+    }
+
     // shape_map draws US states only and the customer base spans two countries,
     // so the tile filters rather than dropping the rest into a map that cannot
     // show them. UK customers are a sixth of revenue, so the label has to say
