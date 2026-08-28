@@ -103,6 +103,16 @@ query: storefront_overview is storefront -> {
       aggregate: revenue is total_sales
     }
 
+    # bar_chart
+    # colspan=12
+    # label="Categories below 45% margin rate"
+    low_margin_categories is {
+      group_by: category
+      aggregate: margin_rate
+      having: margin_rate < 0.45
+      order_by: margin_rate asc
+    }
+
     # colspan=12
     # label="Best sellers"
     best_sellers is {
