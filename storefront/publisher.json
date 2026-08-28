@@ -1,5 +1,5 @@
 {
-    "name": "storefront",
-    "version": "1.7.1",
-    "description": "Storefront Overview dashboard over the thelook ecommerce order lines — revenue, margin, and demand by category, brand and state."
+  "name": "storefront",
+  "version": "1.8.0",
+  "description": "Storefront Overview dashboard over the thelook ecommerce order lines \u2014 revenue, margin, and demand by category, brand and state."
 }
