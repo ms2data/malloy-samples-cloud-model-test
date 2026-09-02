@@ -23,6 +23,9 @@ source: storefront is order_items extend {
   measure:
     # percent
     margin_rate is total_gross_margin / nullif(total_sales, 0)
+    #(doc) Gross margin for California customers in calendar year 2022. Company-wide goal metric.
+    # currency=usd0
+    ca_gross_margin_2022 is total_gross_margin { where: state = 'California' and year(created_at) = 2022 }
 }
 
 #" Revenue, margin and demand across the storefront.
@@ -36,6 +39,14 @@ query: storefront_overview is storefront -> {
   where: status != 'Cancelled' | 'Returned'
 
   aggregate:
+    // Company-wide goal metric: CA gross margin, CY2022. Called out on its own
+    // row above the general overview cards because it carries different
+    // filters (state + year) than the rest of this query's all-time,
+    // all-region KPIs.
+    # colspan=12
+    # label="Goal: CA Gross Margin (CY2022)"
+    ca_gross_margin_2022
+    # break
     # colspan=3
     # label="Revenue"
     # currency=usd0
