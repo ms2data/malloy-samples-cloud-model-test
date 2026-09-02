@@ -1,0 +1,5 @@
+{
+  "name": "cross-model-notebook",
+  "version": "1.0.0",
+  "description": "E2E fixture: a published notebook that imports two models via multi-line `import { ... } from` cells and joins across them. Regression coverage for #5568 (cross-model joins in published notebooks) and the videoamp rf_outcomes_m1 Ø-KPI bug, where the multi-line named-import setup cell got mangled into the restricted-query preamble."
+}
