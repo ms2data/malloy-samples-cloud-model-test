@@ -103,14 +103,29 @@ query: storefront_overview is storefront -> {
       aggregate: revenue is total_sales
     }
 
+    // Margin rate is essentially fixed per category (it barely moves across
+    // 2019-2022), so a "margin below X%" cutoff never really fires on
+    // anything. What does vary, and matters more operationally, is how
+    // reliant a category is on a single product: `all(total_sales, category)`
+    // holds the category total steady while `total_sales` still varies by
+    // product, so dividing the two gives each product's share of its
+    // category's revenue; the second stage keeps the largest share per
+    // category — i.e. how exposed that category is to one product's demand.
     # bar_chart
     # colspan=12
-    # label="Categories with margin rate below 50%"
-    worst_margin_categories is {
+    # label="Revenue concentration: top product's share of category revenue"
+    top_product_concentration is {
+      where: status != 'Cancelled' | 'Returned'
+      group_by: category, product
+      aggregate:
+        product_sales is total_sales
+        category_sales is all(total_sales, category)
+    } -> {
       group_by: category
-      aggregate: margin_rate
-      having: margin_rate < 0.5
-      order_by: margin_rate asc
+      aggregate:
+        # percent
+        top_product_share is max(product_sales / category_sales)
+      order_by: top_product_share desc
     }
 
     # colspan=12
