@@ -1,0 +1,15 @@
+source: sales is duckdb.sql("""
+  select * from (values
+    ('West', 1200),
+    ('East', 950),
+    ('North', 800),
+    ('South', 1100)
+  ) as t(region, amount)
+""") extend {
+  measure: total_amount is sum(amount)
+
+  view: by_region is {
+    group_by: region
+    aggregate: total_amount
+  }
+}

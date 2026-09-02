@@ -1,0 +1,5 @@
+{
+  "name": "pubprobe",
+  "version": "0.0.1",
+  "description": "Probe package with an inline sales dataset (region, amount) and a by_region view."
+}
