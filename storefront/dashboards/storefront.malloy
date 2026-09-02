@@ -103,6 +103,18 @@ query: storefront_overview is storefront -> {
       aggregate: revenue is total_sales
     }
 
+    // Search alone drives roughly two-thirds of revenue, so this tile is here
+    // to surface acquisition concentration, not to compare margin — margin
+    // rate is flat (~52%) across every channel.
+    # bar_chart
+    # colspan=12
+    # label="Revenue by acquisition channel"
+    revenue_by_channel is {
+      group_by: users.traffic_source
+      # currency=usd0
+      aggregate: revenue is total_sales
+    }
+
     # colspan=12
     # label="Best sellers"
     best_sellers is {
