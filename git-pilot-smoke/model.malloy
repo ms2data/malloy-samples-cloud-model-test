@@ -1,0 +1,14 @@
+// Trivial smoke-test model
+source: numbers is duckdb.sql("""
+  SELECT 1 AS n
+  UNION ALL SELECT 2
+  UNION ALL SELECT 3
+""") extend {
+  measure: total_n is sum(n)
+}
+
+// Named query over the numbers source
+query: numbers_summary is numbers -> {
+  aggregate: total_n
+  aggregate: row_count is count()
+}
