@@ -1,0 +1,3 @@
+source: beta is duckdb.table('data/beta.csv') extend {
+  measure: beta_total is w.sum()
+}
