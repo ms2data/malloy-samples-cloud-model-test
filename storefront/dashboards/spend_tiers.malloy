@@ -1,0 +1,93 @@
+// Compares product category mix between big spenders and smaller spenders,
+// following on from the ad-hoc spend-tier-vs-category analysis run in chat.
+//
+// Additive by design, like storefront.malloy: extends `order_items` locally
+// rather than editing ecommerce.malloy, and declares no `given:` so this file
+// stays safe for older compilers reading the rest of the package.
+import { order_items } from '../ecommerce.malloy'
+
+source: spend_tier_categories is order_items extend {
+  dimension:
+    category is inventory_items.product_category
+
+    #(doc) Two-tier bucket of user_order_facts.spend_category: High Spend + VIP (big spenders) vs Low + Mid Spend (smaller spenders), based on lifetime non-cancelled/returned spend.
+    spend_group is user_order_facts.spend_category ?
+      pick 'Big spenders (High + VIP)' when 'High Spend' | 'VIP'
+      pick 'Smaller spenders (Low + Mid)' when 'Low Spend' | 'Mid Spend'
+      else null
+
+  measure:
+    #(doc) This category's share of total sales within its own spend_group (excludes cancelled/returned orders)
+    # percent
+    category_share_of_group is total_sales / nullif(all(total_sales, spend_group), 0)
+}
+
+#" How product category mix differs between big spenders (lifetime High
+#" Spend + VIP tier) and smaller spenders (Low + Mid) — same excludes-
+#" cancelled/returned revenue definition as the Storefront Overview dashboard.
+# artifact { title="Spend Tier vs Category" }
+# dashboard { columns=12 }
+query: spend_tier_vs_category is spend_tier_categories -> {
+  where:
+    status != 'Cancelled' | 'Returned',
+    spend_group is not null
+
+  aggregate:
+    # colspan=3
+    # label="Big spenders"
+    # number=auto
+    big_spender_count is user_count { where: spend_group = 'Big spenders (High + VIP)' }
+    # colspan=3
+    # label="Big spender revenue"
+    # currency=usd0
+    big_spender_sales is total_sales { where: spend_group = 'Big spenders (High + VIP)' }
+    # colspan=3
+    # label="Smaller spenders"
+    # number=auto
+    smaller_spender_count is user_count { where: spend_group = 'Smaller spenders (Low + Mid)' }
+    # colspan=3
+    # label="Smaller spender revenue"
+    # currency=usd0
+    smaller_spender_sales is total_sales { where: spend_group = 'Smaller spenders (Low + Mid)' }
+
+  nest:
+    # break
+    # colspan=12
+    # bar_chart
+    # label="Category share of spend, by spend tier"
+    category_share_by_group is {
+      group_by: category, spend_group
+      aggregate: category_share_of_group
+      order_by: category_share_of_group desc
+    }
+
+    # colspan=6
+    # label="Big spenders: top categories"
+    big_spender_top_categories is {
+      where: spend_group = 'Big spenders (High + VIP)'
+      top: 8
+      group_by: category
+      aggregate:
+        # label="Revenue"
+        # currency=usd0
+        total_sales
+        # label="Share of group"
+        category_share_of_group
+      order_by: total_sales desc
+    }
+
+    # colspan=6
+    # label="Smaller spenders: top categories"
+    smaller_spender_top_categories is {
+      where: spend_group = 'Smaller spenders (Low + Mid)'
+      top: 8
+      group_by: category
+      aggregate:
+        # label="Revenue"
+        # currency=usd0
+        total_sales
+        # label="Share of group"
+        category_share_of_group
+      order_by: total_sales desc
+    }
+}
