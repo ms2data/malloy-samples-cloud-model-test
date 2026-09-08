@@ -7,6 +7,7 @@ source: sales is duckdb.sql("""
   ) as t(region, amount)
 """) extend {
   measure: total_amount is sum(amount)
+  measure: spike_row_count is count()
 
   view: by_region is {
     group_by: region
