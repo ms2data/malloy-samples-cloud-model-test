@@ -6,6 +6,8 @@ source: sales is duckdb.sql("""
     ('South', 1100)
   ) as t(region, amount)
 """) extend {
+  dimension: region_upper is upper(region)
+
   measure: total_amount is sum(amount)
   measure: spike_row_count is count()
 
