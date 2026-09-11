@@ -8,9 +8,11 @@ source: sales is duckdb.sql("""
 """) extend {
   dimension: region_upper is upper(region)
   dimension: region_upper_55275_1 is upper(region)
+  dimension: region_upper_55325_2 is upper(region)
 
   measure: total_amount is sum(amount)
   measure: total_amount_55275_1 is sum(amount)
+  measure: total_amount_55325_2 is sum(amount)
   measure: spike_row_count is count()
 
   view: by_region is {
