@@ -1,0 +1,23 @@
+## artifact { title="Regional performance" tiles=["regional -> by_region", "regional -> by_line"] } dashboard { columns=12 }
+
+source: regional is duckdb.sql("""
+  select * from (values
+    ('West', 1200, 'Hardware'),
+    ('East', 950, 'Software'),
+    ('North', 800, 'Hardware'),
+    ('South', 1100, 'Services')
+  ) as t(region, amount, line)
+""") extend {
+  measure: total_amount is sum(amount)
+  measure: deal_count is count()
+
+  view: by_region is {
+    group_by: region
+    aggregate: total_amount
+  }
+
+  view: by_line is {
+    group_by: line
+    aggregate: total_amount, deal_count
+  }
+}
