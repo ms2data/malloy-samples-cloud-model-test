@@ -1,0 +1,2 @@
+// written through writeDraftFile, the endpoint the dashboard builder saves through
+source: builder_demo is duckdb.sql('select 1 as one')
