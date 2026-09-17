@@ -1,4 +1,4 @@
-## artifact { title="Regional performance" tiles=["regional -> by_line", "regional -> by_region"] } dashboard { columns=12 }
+## artifact { title="Regional performance" tiles=["regional -> by_line", "regional -> by_region", "regional -> by_region_ref"] } dashboard { columns=12 }
 
 source: regional is duckdb.sql("""
   select * from (values
@@ -15,6 +15,8 @@ source: regional is duckdb.sql("""
     group_by: region
     aggregate: total_amount
   }
+
+  view: by_region_ref is by_region
 
   view: by_line is {
     group_by: line
