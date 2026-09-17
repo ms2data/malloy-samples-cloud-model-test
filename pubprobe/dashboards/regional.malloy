@@ -16,5 +16,6 @@ source: regional is duckdb.sql("select * from (values ('West', 1200, 'Hardware')
 
   # colspan=12
   view: by_region is by_region_base
+  # colspan=3
   view: by_line is by_line_base
 }
