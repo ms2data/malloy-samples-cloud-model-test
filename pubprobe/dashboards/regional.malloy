@@ -14,6 +14,7 @@ source: regional is duckdb.sql("select * from (values ('West', 1200, 'Hardware')
     aggregate: total_amount, deal_count
   }
 
+  # colspan=12
   view: by_region is by_region_base
   view: by_line is by_line_base
 }
