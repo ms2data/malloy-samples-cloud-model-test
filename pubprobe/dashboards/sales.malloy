@@ -6,7 +6,20 @@ source: sales is duckdb.sql("""
     ('South', 1100)
   ) as t(region, amount)
 """) extend {
+  dimension: region_upper is upper(region)
+  dimension: region_upper_55275_1 is upper(region)
+  dimension: region_upper_55325_2 is upper(region)
+  dimension: region_upper_55387_3 is upper(region)
+  dimension: region_upper_55440_4 is upper(region)
+  dimension: region_upper_55491_5 is upper(region)
+
   measure: total_amount is sum(amount)
+  measure: total_amount_55275_1 is sum(amount)
+  measure: total_amount_55325_2 is sum(amount)
+  measure: total_amount_55387_3 is sum(amount)
+  measure: total_amount_55440_4 is sum(amount)
+  measure: total_amount_55491_5 is sum(amount)
+  measure: spike_row_count is count()
 
   view: by_region is {
     group_by: region
