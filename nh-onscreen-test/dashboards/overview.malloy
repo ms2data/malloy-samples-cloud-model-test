@@ -1,3 +1,3 @@
 ##! experimental.givens
-## artifact { title="NH Builder Test" tiles=["orders -> grand_total", "orders -> by_brand"] } dashboard { columns=2 }
+## artifact { title="HIDDEN PANEL EDIT" tiles=["orders -> grand_total", "orders -> by_brand"] } dashboard { columns=2 }
 import { orders } from '../orders.malloy'
