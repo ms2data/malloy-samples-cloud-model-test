@@ -1,4 +1,3 @@
 ##! experimental.givens
+## artifact { title="CONTROL RUN" tiles=["orders -> grand_total", "orders -> by_brand"] } dashboard { columns=2 }
 import { orders } from '../orders.malloy'
-
-// NO ARTIFACT TAG - the builder cannot open this
