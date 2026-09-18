@@ -1,0 +1,19 @@
+source: orders is duckdb.sql("""
+  SELECT * FROM (VALUES
+    (1, 'Acme', 1000),
+    (2, 'Acme', 234),
+    (3, 'Globex', 5678)
+  ) AS t(id, brand, amount)
+""") extend {
+  dimension: brand_name is brand
+  measure: total_amount is amount.sum()
+
+  view: by_brand is {
+    group_by: brand_name
+    aggregate: total_amount
+  }
+
+  view: grand_total is {
+    aggregate: total_amount
+  }
+}
