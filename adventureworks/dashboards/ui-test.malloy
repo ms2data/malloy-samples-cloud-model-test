@@ -1,3 +1,12 @@
-## artifact { title="UI Test" tiles=[] dashboard_columns=3 }
-// An empty dashboard, ready for tiles to be added in the Design view.
+## artifact { title="UI Test" tiles=["ui_sales -> total_revenue"] dashboard_columns=3 }
+// A starter dashboard with one KPI tile; add more tiles in the Design view.
 import { sales } from '../adventureworks.malloy'
+
+source: ui_sales is sales extend {
+  view: total_revenue is {
+    aggregate:
+      # label="Revenue"
+      # currency=usd0
+      total_sales
+  }
+}
