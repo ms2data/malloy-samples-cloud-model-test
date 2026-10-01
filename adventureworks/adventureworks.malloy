@@ -1,0 +1,83 @@
+// Translated from the Microsoft AdventureWorks Power BI sample (.pbix, import mode).
+// The Power BI model's four auto date/time tables are deliberately absent; the Date
+// table below is the real one.
+
+source: category_sort is duckdb.table('data/category_sort.parquet') extend {
+  primary_key: category
+}
+
+source: customers is duckdb.table('data/customer.parquet') extend {
+  primary_key: customer_key
+  measure: customer_count is count()
+}
+
+source: dates is duckdb.table('data/date.parquet') extend {
+  primary_key: date_key
+}
+
+source: products is duckdb.table('data/product.parquet') extend {
+  primary_key: product_key
+  // Power BI joined a 4-row table named "Table" here purely to order categories.
+  join_one: category_sort with category
+  measure: product_count is count()
+  dimension: margin_pct is (list_price - standard_cost) / nullif(list_price, 0)
+}
+
+source: resellers is duckdb.table('data/reseller.parquet') extend {
+  primary_key: reseller_key
+  measure: reseller_count is count()
+}
+
+source: territories is duckdb.table('data/sales_territory.parquet') extend {
+  primary_key: sales_territory_key
+}
+
+source: sales_orders is duckdb.table('data/sales_order.parquet') extend {
+  primary_key: sales_order_line_key
+}
+
+source: sales is duckdb.table('data/sales.parquet') extend {
+  primary_key: sales_order_line_key
+
+  join_one: customers with customer_key
+  join_one: products with product_key
+  join_one: resellers with reseller_key
+  join_one: territories with sales_territory_key
+  join_one: sales_orders with sales_order_line_key
+
+  // Power BI declares three relationships to Date and keeps two inactive, switching
+  // to them with USERELATIONSHIP inside a measure. Malloy names all three instead.
+  join_one: order_date is dates with order_date_key
+  join_one: due_date is dates with due_date_key
+  join_one: ship_date is dates with ship_date_key
+
+  measure:
+    order_line_count is count()
+    total_sales is sum(sales_amount)
+    total_quantity is sum(order_quantity)
+    total_cost is sum(total_product_cost)
+    gross_profit is total_sales - total_cost
+    margin_pct is gross_profit / nullif(total_sales, 0)
+    avg_unit_price is avg(unit_price)
+    // DAX COUNT counts non-blank rows; count(reseller_key) here would be the
+    // distinct count, which is a different number.
+    reseller_line_count is count() { where: reseller_key is not null }
+
+  dimension:
+    channel is sales_orders.channel
+
+  // "Sales Amount by Due Date" in Power BI is CALCULATE(SUM(Sales[Sales Amount]),
+  // USERELATIONSHIP(Sales[DueDateKey], 'Date'[DateKey])). Malloy has no inactive
+  // relationship to switch to, so the second join path carries it instead.
+  view: sales_by_due_date is {
+    group_by: fiscal_year is due_date.fiscal_year
+    aggregate: total_sales
+    order_by: fiscal_year
+  }
+
+  view: sales_by_order_date is {
+    group_by: fiscal_year is order_date.fiscal_year
+    aggregate: total_sales
+    order_by: fiscal_year
+  }
+}

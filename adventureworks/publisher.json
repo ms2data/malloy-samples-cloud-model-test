@@ -1,0 +1,5 @@
+{
+    "name": "adventureworks",
+    "version": "1.2.0",
+    "description": "Microsoft's AdventureWorks Power BI sample, translated from its semantic model to Malloy"
+}

@@ -1,0 +1,76 @@
+// A laid-out dashboard over the AdventureWorks order lines.
+//
+// Additive by design: this file extends `sales` locally rather than editing
+// adventureworks.malloy, so the package's existing model and notebook are
+// untouched.
+//
+// Layout is one 12-column grid — every card and tile carries a colspan and each
+// row sums to 12. `# break` starts the row after the KPI cards.
+import { sales } from '../adventureworks.malloy'
+
+source: storefront is sales extend {
+  dimension:
+    category is products.category
+    subcategory is products.subcategory
+    country is territories.country
+    // `date` is a keyword, so the column needs backticks, and the parquet holds
+    // it as TIMESTAMP_NS, which Malloy sees as a SQL-native type and refuses to
+    // truncate. Aliasing the cast once here keeps every tile reading as plain
+    // Malloy.
+    ordered_at is order_date.`date`::timestamp
+    fiscal_year is order_date.fiscal_year
+
+  measure:
+    // The worked FC1 recipe, written against the leaf aggregate rather than
+    // against total_sales: a filter refining an already-derived measure is
+    // refused by preaggregation.
+    bike_sales is sum(sales_amount) { where: products.category = 'Bikes' }
+}
+
+#" Revenue, margin and demand across AdventureWorks.
+# artifact { title="AdventureWorks Sales" }
+# dashboard { columns=12 }
+query: sales_overview is storefront -> {
+  aggregate:
+    # colspan=3
+    # label="Revenue"
+    # currency=usd0
+    total_sales
+    # colspan=3
+    # label="Bike sales"
+    # currency=usd0
+    bike_sales
+    # colspan=3
+    # label="Gross profit"
+    # currency=usd0
+    gross_profit
+    # colspan=3
+    # label="Margin rate"
+    # percent
+    margin_pct
+
+  nest:
+    // Order dates run to 15 June 2020, and a half month plotted beside full
+    // ones reads as a collapse in demand. Chart whole months only — which is
+    // why these bars sum to slightly less than the Revenue card above them.
+    # break
+    # line_chart
+    # colspan=8
+    # label="Revenue by month (through May 2020)"
+    revenue_trend is {
+      where: ordered_at < @2020-06-01
+      group_by: order_month is ordered_at.month
+      # currency=usd0
+      aggregate: revenue is total_sales
+    }
+
+    # bar_chart
+    # colspan=4
+    # label="Top product lines"
+    top_subcategories is {
+      top: 8
+      group_by: subcategory
+      # currency=usd0
+      aggregate: revenue is total_sales
+    }
+}

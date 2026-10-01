@@ -1,0 +1,85 @@
+>>>markdown
+# AdventureWorks
+
+Microsoft's AdventureWorks Power BI sample, translated from its semantic model into Malloy.
+
+Reseller and internet sales for a fictional bicycle manufacturer: 121,253 order lines
+across 397 products, 18,485 customers and 702 resellers, over three fiscal years.
+
+`sales` is the fact source. Everything else is a dimension reachable from it.
+
+## What changed in translation
+
+The Power BI file carried four **auto date/time tables** (`LocalDateTable_*` and a
+`DateTableTemplate_*`), one generated per date column. They are an artifact of a setting
+rather than a modeling decision, so they are gone; `dates` is the real date dimension.
+
+Power BI declared **three relationships from `sales` to the date table** and kept two of
+them inactive, reaching them through a measure that called `USERELATIONSHIP`. Malloy has
+no notion of an inactive join, so all three are named instead: `order_date`, `due_date`
+and `ship_date`. The Power BI measure `Sales Amount by Due Date` is therefore not a
+measure here at all, just `total_sales` grouped along `due_date`.
+
+The 4-row table Power BI called `Table` is a category sort order, joined from `products`.
+It is `category_sort` here.
+
+Column names were snake_cased (`Sales Amount` to `sales_amount`, `State-Province` to
+`state_province`).
+
+>>>malloy
+import "adventureworks.malloy"
+
+# bar_chart
+run: sales -> {
+  group_by: products.category
+  aggregate: total_sales
+  order_by: total_sales desc
+}
+
+>>>markdown
+## Sales by territory and channel
+
+>>>malloy
+run: sales -> {
+  group_by: territories.group
+  aggregate: total_sales, order_line_count
+  nest: by_channel is {
+    group_by: channel
+    aggregate: total_sales
+    order_by: total_sales desc
+  }
+  order_by: total_sales desc
+}
+
+>>>markdown
+## The two date paths
+
+Ordered versus due, the same dollars distributed differently. This is what the Power BI
+model expressed with an inactive relationship and `USERELATIONSHIP`.
+
+>>>malloy
+run: sales -> {
+  group_by: fiscal_year is order_date.fiscal_year
+  aggregate: sales_by_order_date is total_sales
+  order_by: fiscal_year
+}
+
+>>>malloy
+// Same dollars, allocated along the due date instead. Both columns total
+// $109,809,274.20; only the distribution across years moves.
+run: sales -> {
+  group_by: fiscal_year is due_date.fiscal_year
+  aggregate: sales_by_due_date is total_sales
+  order_by: fiscal_year
+}
+
+>>>markdown
+## Product margin
+
+>>>malloy
+run: sales -> {
+  group_by: products.category, products.subcategory
+  aggregate: total_sales, gross_profit, margin_pct
+  order_by: gross_profit desc
+  limit: 15
+}
