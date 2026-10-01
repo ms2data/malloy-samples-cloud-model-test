@@ -1,0 +1,3 @@
+## artifact { title="UI Test" tiles=[] dashboard_columns=3 }
+// An empty dashboard, ready for tiles to be added in the Design view.
+import { sales } from '../adventureworks.malloy'
