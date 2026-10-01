@@ -1,6 +1,10 @@
-## artifact { title="UI Test" tiles=["ui_sales -> total_revenue"] dashboard_columns=3 }
+##! experimental.givens
+## artifact { title="UI Test" tiles=["ui_sales -> total_revenue", "ui_sales -> sales_by_order_date_tile"] dashboard_columns=3 }
 // A starter dashboard with one KPI tile; add more tiles in the Design view.
 import { sales } from '../adventureworks.malloy'
+
+# label="Fiscal year" control=select suggest { source=sales dimension=fiscal_year }
+given: FISCAL_YEAR :: filter<string> is f''
 
 source: ui_sales is sales extend {
   view: total_revenue is {
@@ -8,5 +12,9 @@ source: ui_sales is sales extend {
       # label="Revenue"
       # currency=usd0
       total_sales
+    where: order_date.fiscal_year ~ $FISCAL_YEAR
   }
+
+  # colspan=2
+  view: sales_by_order_date_tile is sales_by_order_date + { where: order_date.fiscal_year ~ $FISCAL_YEAR }
 }
